@@ -7,7 +7,7 @@ const path = require('path');
 const PORT = process.env.PORT || 8080;
 const HOSTNAME = 'my-first-website-2026-bwbrhja8dnfuf9ab.eastasia-01.azurewebsites.net';
 const TURNSTILE_VERIFY_URL = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
-const GEMINI_MODEL = 'gemini-3.8-flash';
+const GEMINI_MODEL = 'gemini-3.5-flash-lite';
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
 
 const rateBuckets = new Map();
