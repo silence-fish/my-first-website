@@ -135,32 +135,52 @@ async function askGemini(message, history) {
 }
 
 
+
 async function askCloudflareWorkersAI(message, history) {
   const accountId = process.env.CLOUDFLARE_ACCOUNT_ID;
   const apiToken = process.env.CLOUDFLARE_API_TOKEN;
+
   if (!accountId || !/^[a-f0-9]{32}$/i.test(accountId)) {
     throw new Error('Cloudflare Account ID 未配置正确。');
   }
+
   if (!apiToken) {
     throw new Error('服务器尚未配置 Cloudflare Workers AI 凭据。');
   }
 
-  // Use a fixed server-side model; the visitor cannot supply a model ID.
   const model = '@cf/meta/llama-3.1-8b-instruct';
-  const endpoint = `https://api.cloudflare.com/client/v4/accounts/${accountId}/ai/run/${model}`;
+  const endpoint =
+    `https://api.cloudflare.com/client/v4/accounts/${accountId}/ai/run/${model}`;
 
-  const transcript = [
-    'System: 你是 DIGITAL SPACE 网站的中文 AI 助手。请友好、清晰、准确地回答访客问题。默认使用中文；如果用户使用其他语言，则跟随用户语言。不要声称能访问网站服务器、用户设备或实时网络，除非确实有相应工具。'
+  const messages = [
+    {
+      role: 'system',
+      content: '你是 DIGITAL SPACE 网站的中文 AI 助手。请直接回答用户当前的问题，保持友好、自然、简洁。默认使用中文，用户使用其他语言时跟随其语言。不要重复欢迎词，不要要求用户输入开始、退出或结束，不要编造事实。'
+    }
   ];
 
-  for (const item of history) {
-    if (!item || !['user', 'model'].includes(item.role) || typeof item.text !== 'string') continue;
-    const text = item.text.trim().slice(0, MAX_MESSAGE_CHARS);
-    if (!text) continue;
-    transcript.push(`${item.role === 'user' ? 'User' : 'Assistant'}: ${text}`);
+  // 最多保留最近 8 条历史消息
+  const recentHistory = Array.isArray(history)
+    ? history.slice(-8)
+    : [];
+
+  for (const item of recentHistory) {
+    if (!item || typeof item.text !== 'string') continue;
+
+    const content = item.text.trim().slice(0, MAX_MESSAGE_CHARS);
+    if (!content) continue;
+
+    if (item.role === 'user') {
+      messages.push({ role: 'user', content });
+    } else if (item.role === 'model' || item.role === 'assistant') {
+      messages.push({ role: 'assistant', content });
+    }
   }
-  transcript.push(`User: ${message}`);
-  transcript.push('Assistant:');
+
+  messages.push({
+    role: 'user',
+    content: message.trim().slice(0, MAX_MESSAGE_CHARS)
+  });
 
   const response = await fetch(endpoint, {
     method: 'POST',
@@ -169,23 +189,31 @@ async function askCloudflareWorkersAI(message, history) {
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      prompt: transcript.join('\n\n'),
+      messages,
       max_tokens: 700,
-      temperature: 0.7
+      temperature: 0.4,
+      repetition_penalty: 1.1
     }),
     signal: AbortSignal.timeout(30000)
   });
 
   const data = await response.json().catch(() => ({}));
+
   if (!response.ok || data.success === false) {
     const detail = Array.isArray(data.errors) && data.errors[0]?.message;
-    throw new Error(detail ? `Cloudflare Workers AI 暂时无法响应：${detail}` : 'Cloudflare Workers AI 暂时无法响应，请稍后重试。');
+    throw new Error(
+      detail
+        ? `Cloudflare Workers AI 暂时无法响应：${detail}`
+        : 'Cloudflare Workers AI 暂时无法响应，请稍后重试。'
+    );
   }
 
   const reply = data?.result?.response;
+
   if (typeof reply !== 'string' || !reply.trim()) {
     throw new Error('Cloudflare Workers AI 暂时没有生成回复，请换个问题试试。');
   }
+
   return reply.trim();
 }
 
