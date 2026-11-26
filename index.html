@@ -132,9 +132,41 @@
       .links a { font-size: 11px; }
       .eyebrow { font-size: 10px; }
     }
+
+    /* 动态粒子背景与鼠标光效 */
+    #particle-bg {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      pointer-events: none;
+      opacity: .72;
+    }
+    .cursor-glow {
+      position: fixed;
+      width: 360px;
+      height: 360px;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0;
+      transform: translate(-50%, -50%);
+      background: radial-gradient(circle, rgba(83,229,255,.105), rgba(155,123,255,.045) 38%, transparent 70%);
+      transition: opacity .25s ease;
+    }
+    body.pointer-active .cursor-glow { opacity: 1; }
+    .panel, .btn, header, footer { position: relative; z-index: 1; }
+    @media (pointer: coarse), (prefers-reduced-motion: reduce) {
+      .cursor-glow { display: none; }
+      #particle-bg { opacity: .35; }
+    }
+
   </style>
 </head>
 <body>
+  <canvas id="particle-bg" aria-hidden="true"></canvas>
+  <div class="cursor-glow" aria-hidden="true"></div>
   <header>
     <div class="wrap nav">
       <a class="brand" href="#home">DIGITAL<span>.</span>SPACE</a>
@@ -223,5 +255,101 @@
       <span>Designed for curiosity. Built for the future.</span>
     </div>
   </footer>
+
+  <script>
+    (() => {
+      const canvas = document.getElementById('particle-bg');
+      const ctx = canvas.getContext('2d');
+      const glow = document.querySelector('.cursor-glow');
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const coarsePointer = window.matchMedia('(pointer: coarse)').matches;
+      let width = 0, height = 0, particles = [], pointer = { x: -1000, y: -1000 };
+      let animationFrame;
+
+      function resize() {
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        width = window.innerWidth;
+        height = window.innerHeight;
+        canvas.width = Math.floor(width * dpr);
+        canvas.height = Math.floor(height * dpr);
+        canvas.style.width = width + 'px';
+        canvas.style.height = height + 'px';
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+        const count = Math.min(85, Math.max(28, Math.floor(width * height / 18000)));
+        particles = Array.from({ length: count }, () => ({
+          x: Math.random() * width,
+          y: Math.random() * height,
+          vx: (Math.random() - .5) * .34,
+          vy: (Math.random() - .5) * .34,
+          r: Math.random() * 1.5 + .7
+        }));
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, width, height);
+        for (let i = 0; i < particles.length; i++) {
+          const p = particles[i];
+          if (!reducedMotion) {
+            p.x += p.vx; p.y += p.vy;
+            if (p.x < 0 || p.x > width) p.vx *= -1;
+            if (p.y < 0 || p.y > height) p.vy *= -1;
+          }
+
+          const dx = pointer.x - p.x, dy = pointer.y - p.y;
+          const distanceToPointer = Math.hypot(dx, dy);
+          if (!coarsePointer && distanceToPointer < 115 && distanceToPointer > 0) {
+            p.x -= dx / distanceToPointer * .22;
+            p.y -= dy / distanceToPointer * .22;
+          }
+
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(150, 211, 255, .72)';
+          ctx.fill();
+
+          for (let j = i + 1; j < particles.length; j++) {
+            const q = particles[j];
+            const dx2 = p.x - q.x, dy2 = p.y - q.y;
+            const distance = Math.hypot(dx2, dy2);
+            if (distance < 118) {
+              ctx.beginPath();
+              ctx.moveTo(p.x, p.y);
+              ctx.lineTo(q.x, q.y);
+              ctx.strokeStyle = `rgba(105, 151, 255, ${.14 * (1 - distance / 118)})`;
+              ctx.lineWidth = .7;
+              ctx.stroke();
+            }
+          }
+        }
+        if (!reducedMotion) animationFrame = requestAnimationFrame(draw);
+      }
+
+      window.addEventListener('resize', () => {
+        cancelAnimationFrame(animationFrame);
+        resize();
+        draw();
+      }, { passive: true });
+
+      if (!coarsePointer) {
+        window.addEventListener('pointermove', (event) => {
+          pointer.x = event.clientX;
+          pointer.y = event.clientY;
+          glow.style.left = event.clientX + 'px';
+          glow.style.top = event.clientY + 'px';
+          document.body.classList.add('pointer-active');
+        }, { passive: true });
+        document.addEventListener('pointerleave', () => {
+          pointer.x = -1000;
+          pointer.y = -1000;
+          document.body.classList.remove('pointer-active');
+        });
+      }
+
+      resize();
+      draw();
+    })();
+  </script>
+
 </body>
 </html>
