@@ -1,0 +1,9 @@
+
+{
+  "name": "my-first-website",
+  "version": "1.0.0",
+  "description": "My first website",
+  "scripts": {
+    "start": "node server.js"
+  }
+}
