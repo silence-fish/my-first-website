@@ -1,29 +1,227 @@
-
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>我的第一个网站</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            background: #f0f4f8;
-            padding: 80px 20px;
-        }
-        h1 {
-            color: #2563eb;
-        }
-        p {
-            color: #555;
-            font-size: 18px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="DIGITAL SPACE — 探索数字世界，发现科技与创造的无限可能。">
+  <meta name="theme-color" content="#080b18">
+  <title>DIGITAL SPACE | 探索数字世界</title>
+  <style>
+    :root {
+      --bg: #080b18;
+      --panel: rgba(17, 23, 48, .72);
+      --text: #f4f6ff;
+      --muted: #a5aecb;
+      --cyan: #53e5ff;
+      --purple: #9b7bff;
+      --line: rgba(151, 170, 255, .16);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--text);
+      background:
+        radial-gradient(ellipse at 18% 12%, rgba(64, 92, 255, .18), transparent 34rem),
+        radial-gradient(ellipse at 85% 35%, rgba(143, 64, 255, .15), transparent 32rem),
+        var(--bg);
+      font-family: Inter, "Segoe UI", "Microsoft YaHei", sans-serif;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: .18;
+      background-image: linear-gradient(rgba(130,150,255,.08) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(130,150,255,.08) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: linear-gradient(to bottom, black, transparent 82%);
+    }
+    a { color: inherit; text-decoration: none; }
+    .wrap { width: min(1120px, calc(100% - 40px)); margin: 0 auto; }
+    header {
+      position: sticky; top: 0; z-index: 10;
+      backdrop-filter: blur(18px);
+      background: rgba(8, 11, 24, .72);
+      border-bottom: 1px solid var(--line);
+    }
+    .nav { min-height: 72px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+    .brand { font-weight: 800; letter-spacing: .16em; font-size: 15px; }
+    .brand span { color: var(--cyan); }
+    .links { display: flex; gap: 28px; color: var(--muted); font-size: 14px; }
+    .links a:hover { color: var(--cyan); }
+    .hero {
+      min-height: 690px; display: grid; place-items: center;
+      position: relative; text-align: center; padding: 100px 0 120px;
+    }
+    .orb {
+      position: absolute; width: 330px; height: 330px; border-radius: 50%;
+      background: linear-gradient(135deg, rgba(83,229,255,.16), rgba(155,123,255,.2));
+      filter: blur(48px); animation: float 8s ease-in-out infinite; z-index: -1;
+    }
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: 9px;
+      border: 1px solid rgba(83,229,255,.28); color: #b9f5ff;
+      border-radius: 999px; padding: 8px 14px; font-size: 12px;
+      letter-spacing: .13em; background: rgba(83,229,255,.06);
+    }
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 14px var(--cyan); }
+    h1 {
+      margin: 28px 0 14px; font-size: clamp(48px, 8vw, 88px);
+      line-height: 1.08; letter-spacing: -.055em;
+      background: linear-gradient(100deg, #fff 15%, #9cefff 48%, #b69aff 82%);
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+    .subtitle { color: var(--muted); font-size: clamp(16px, 2vw, 20px); letter-spacing: .08em; }
+    .intro { max-width: 620px; margin: 22px auto 32px; color: #b5bfd9; }
+    .actions { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      padding: 12px 22px; border-radius: 10px; font-weight: 650; font-size: 14px;
+      transition: transform .2s, box-shadow .2s, border-color .2s;
+    }
+    .btn:hover { transform: translateY(-3px); }
+    .primary { color: #06101b; background: linear-gradient(100deg, var(--cyan), #9b9cff); box-shadow: 0 8px 30px rgba(83,229,255,.2); }
+    .secondary { border: 1px solid var(--line); color: #dce4ff; background: rgba(255,255,255,.03); }
+    section { padding: 76px 0; position: relative; }
+    .section-head { margin-bottom: 30px; }
+    .kicker { color: var(--cyan); font-size: 12px; letter-spacing: .2em; text-transform: uppercase; }
+    h2 { font-size: clamp(28px, 4vw, 40px); margin: 8px 0; letter-spacing: -.03em; }
+    .section-desc { color: var(--muted); margin: 0; }
+    .about-grid { display: grid; grid-template-columns: 1.15fr .85fr; gap: 22px; }
+    .panel {
+      background: var(--panel); border: 1px solid var(--line); border-radius: 18px;
+      padding: 28px; box-shadow: 0 18px 60px rgba(0,0,0,.18);
+    }
+    .panel p { color: var(--muted); margin-bottom: 0; }
+    .stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .stat { border: 1px solid var(--line); border-radius: 14px; padding: 18px; background: rgba(255,255,255,.025); }
+    .stat strong { display: block; font-size: 25px; color: var(--cyan); }
+    .stat span { color: var(--muted); font-size: 13px; }
+    .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    .project { min-height: 220px; position: relative; overflow: hidden; transition: transform .25s, border-color .25s; }
+    .project:hover { transform: translateY(-6px); border-color: rgba(83,229,255,.45); }
+    .project-number { color: var(--cyan); font-size: 12px; letter-spacing: .15em; }
+    .project h3 { margin: 24px 0 8px; font-size: 21px; }
+    .project p { font-size: 14px; }
+    .project::after {
+      content: ""; position: absolute; width: 130px; height: 130px; right: -45px; bottom: -55px;
+      border: 1px solid rgba(83,229,255,.22); border-radius: 32px; transform: rotate(35deg);
+      box-shadow: 0 0 45px rgba(83,229,255,.08);
+    }
+    .contact { text-align: center; padding: 52px 28px; }
+    .contact p { color: var(--muted); }
+    footer { border-top: 1px solid var(--line); color: #7884a6; padding: 26px 0; font-size: 13px; }
+    .footer-inner { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+    @keyframes float { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(22px,-18px) scale(1.08); } }
+    @media (max-width: 760px) {
+      .links { gap: 14px; font-size: 12px; }
+      .nav { min-height: 64px; }
+      .hero { min-height: 610px; padding: 80px 0; }
+      .about-grid, .cards { grid-template-columns: 1fr; }
+      section { padding: 58px 0; }
+      .panel { padding: 23px; }
+    }
+    @media (max-width: 440px) {
+      .wrap { width: min(100% - 28px, 1120px); }
+      .brand { font-size: 12px; }
+      .links { gap: 10px; }
+      .links a { font-size: 11px; }
+      .eyebrow { font-size: 10px; }
+    }
+  </style>
 </head>
 <body>
-    <h1>欢迎来到我的网站！</h1>
-    <p>这是我制作并部署的第一个网页。</p>
-    <p>Hello, World!</p>
+  <header>
+    <div class="wrap nav">
+      <a class="brand" href="#home">DIGITAL<span>.</span>SPACE</a>
+      <nav class="links" aria-label="主导航">
+        <a href="#home">首页</a>
+        <a href="#about">关于</a>
+        <a href="#projects">项目</a>
+        <a href="#contact">联系</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero wrap" id="home">
+      <div class="orb" aria-hidden="true"></div>
+      <div>
+        <div class="eyebrow"><span class="dot"></span> WELCOME TO MY DIGITAL UNIVERSE</div>
+        <h1>探索数字世界</h1>
+        <div class="subtitle">DREAM · CREATE · EXPLORE</div>
+        <p class="intro">欢迎来到我的数字空间。在这里，科技与创意相遇，想法不断生长，探索永不停止。</p>
+        <div class="actions">
+          <a class="btn primary" href="#projects">探索我的项目&nbsp; ↗</a>
+          <a class="btn secondary" href="#about">了解更多</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="wrap" id="about">
+      <div class="section-head">
+        <div class="kicker">01 / ABOUT</div>
+        <h2>关于这个空间</h2>
+        <p class="section-desc">一个持续更新的个人数字基地。</p>
+      </div>
+      <div class="about-grid">
+        <div class="panel">
+          <h3>你好，世界。</h3>
+          <p>我是一个热爱科技、探索 AI、喜欢创造的数字探索者。这个网站是我的线上空间，用来记录灵感、展示作品，并分享正在探索的新事物。</p>
+        </div>
+        <div class="stats">
+          <div class="stat"><strong>AI</strong><span>人工智能探索</span></div>
+          <div class="stat"><strong>WEB</strong><span>网页与创作</span></div>
+          <div class="stat"><strong>IDEAS</strong><span>灵感与想法</span></div>
+          <div class="stat"><strong>∞</strong><span>持续学习中</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="wrap" id="projects">
+      <div class="section-head">
+        <div class="kicker">02 / PROJECTS</div>
+        <h2>项目展示</h2>
+        <p class="section-desc">这里将展示我的作品与正在进行的实验。</p>
+      </div>
+      <div class="cards">
+        <article class="panel project">
+          <div class="project-number">PROJECT / 01</div>
+          <h3>个人网站</h3>
+          <p>从零开始搭建并部署的个人网站，持续完善中。</p>
+        </article>
+        <article class="panel project">
+          <div class="project-number">PROJECT / 02</div>
+          <h3>AI 探索</h3>
+          <p>记录人工智能工具、模型与应用方面的尝试。</p>
+        </article>
+        <article class="panel project">
+          <div class="project-number">PROJECT / 03</div>
+          <h3>创意实验室</h3>
+          <p>收集灵感，把有趣的想法一步步变成现实。</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="wrap" id="contact">
+      <div class="panel contact">
+        <div class="kicker">03 / CONTACT</div>
+        <h2>保持连接</h2>
+        <p>联系方式即将开放，敬请期待。</p>
+        <a class="btn secondary" href="#home">返回首页 ↑</a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap footer-inner">
+      <span>© 2026 DIGITAL SPACE. All rights reserved.</span>
+      <span>Designed for curiosity. Built for the future.</span>
+    </div>
+  </footer>
 </body>
 </html>
